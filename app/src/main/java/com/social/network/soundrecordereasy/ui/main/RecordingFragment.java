@@ -3,6 +3,7 @@ package com.social.network.soundrecordereasy.ui.main;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -11,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
+import android.widget.Toast;
 
 import com.social.network.soundrecordereasy.R;
 public class RecordingFragment extends Fragment   {
@@ -19,10 +22,13 @@ public class RecordingFragment extends Fragment   {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     Boolean isRecording;
+    Chronometer timerWidget;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    FloatingActionButton recordButton;
 
     private OnFragmentInteractionListener mListener;
 
@@ -68,9 +74,10 @@ public class RecordingFragment extends Fragment   {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FloatingActionButton fab = view.findViewById(R.id.fab);
+        recordButton = view.findViewById(R.id.record_button);
+        timerWidget = view.findViewById(R.id.timer_widget);
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 togglePng();
@@ -81,16 +88,18 @@ public class RecordingFragment extends Fragment   {
     private void togglePng() {
         if (isRecording)
         {
-            // change jpg to record icon
+            recordButton.setImageResource(R.drawable.stop);
+            timerWidget.setBase(SystemClock.elapsedRealtime());
+            timerWidget.start();
             isRecording = false;
         }
         else {
-            // change jpg to stop icon
-
+            recordButton.setImageResource(R.drawable.mic_img);
+            timerWidget.stop();
+            timerWidget.setBase(SystemClock.elapsedRealtime());
             isRecording = true;
+            Toast.makeText(getContext(), "here path of saved file", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
     public void onButtonPressed(Uri uri) {
