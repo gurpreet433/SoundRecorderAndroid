@@ -1,21 +1,27 @@
 package com.social.network.soundrecordereasy.ui.main;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.social.network.soundrecordereasy.R;
+import com.social.network.soundrecordereasy.RecordingUtility;
+
 public class RecordingFragment extends Fragment   {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -23,17 +29,24 @@ public class RecordingFragment extends Fragment   {
     private static final String ARG_PARAM2 = "param2";
     Boolean isRecording;
     Chronometer timerWidget;
+    RecordingUtility recorder;
+
+    TextView statusText;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    // permission
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 220;
 
     FloatingActionButton recordButton;
 
     private OnFragmentInteractionListener mListener;
 
     public RecordingFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -56,30 +69,64 @@ public class RecordingFragment extends Fragment   {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
+        else
+        {
+            recorder = new RecordingUtility(getContext());
+        }
+
+
+
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        isRecording = true;
+        isRecording = null;
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                recorder = new RecordingUtility(getContext());
+                break;
+        }
+        if (!permissionToRecordAccepted)
+        {
+            Toast.makeText(getContext(), "Cannot record audio without permission!", Toast.LENGTH_SHORT).show();
+            getActivity().finish();
+        }
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recording, container, false);
+        return inflater.inflate(R.layout.fragment_new_recording, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recordButton = view.findViewById(R.id.record_button);
-        timerWidget = view.findViewById(R.id.timer_widget);
+        recordButton =  view.findViewById(R.id.record_button);
+        timerWidget  =  view.findViewById(R.id.timer_widget);
+        statusText   =  view.findViewById(R.id.status_text);
 
         recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (isRecording == null)
+                    isRecording = true;
                 togglePng();
             }
         });
@@ -91,14 +138,23 @@ public class RecordingFragment extends Fragment   {
             recordButton.setImageResource(R.drawable.stop);
             timerWidget.setBase(SystemClock.elapsedRealtime());
             timerWidget.start();
+            recorder.startRecording();
+            statusText.setText("Recording..");
             isRecording = false;
+            Log.i("here", "here");
         }
         else {
             recordButton.setImageResource(R.drawable.mic_img);
             timerWidget.stop();
             timerWidget.setBase(SystemClock.elapsedRealtime());
+            String recordingfile = "";
+
+            Log.i("here", "here1");
+            Log.i("here", recorder.toString());
+            statusText.setText("Tap the button to start recording");
+            recordingfile = recorder.StopRecording();
+            Toast.makeText(getContext(), "File Saved: "+ recordingfile + "\n", Toast.LENGTH_SHORT).show();
             isRecording = true;
-            Toast.makeText(getContext(), "here path of saved file", Toast.LENGTH_SHORT).show();
         }
     }
 
