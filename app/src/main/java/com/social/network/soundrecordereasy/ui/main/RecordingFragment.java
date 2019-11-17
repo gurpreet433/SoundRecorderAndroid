@@ -23,7 +23,6 @@ import com.social.network.soundrecordereasy.R;
 import com.social.network.soundrecordereasy.RecordingUtility;
 
 public class RecordingFragment extends Fragment   {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -32,8 +31,6 @@ public class RecordingFragment extends Fragment   {
     RecordingUtility recorder;
 
     TextView statusText;
-
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -78,9 +75,6 @@ public class RecordingFragment extends Fragment   {
         {
             recorder = new RecordingUtility(getContext());
         }
-
-
-
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -154,8 +148,14 @@ public class RecordingFragment extends Fragment   {
             statusText.setText("Tap the button to start recording");
             recordingfile = recorder.StopRecording();
             Toast.makeText(getContext(), "File Saved: "+ recordingfile + "\n", Toast.LENGTH_SHORT).show();
+            notifyRecyclerView();
             isRecording = true;
         }
+    }
+
+    public void notifyRecyclerView()
+    {
+        
     }
 
     public void onButtonPressed(Uri uri) {
