@@ -37,13 +37,14 @@
             android:orientation="vertical">
 
             <TextView
+                android:textStyle="bold"
                 android:text="Myrecording.mp3"
                 android:id="@+id/recording_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:text="00:05"
-                android:id="@+id/recording_time"
+                android:id="@+id/recording_duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView

@@ -10,12 +10,12 @@ import java.util.List;
 
 public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<RecordingRecyclerViewAdapter.ViewHolder> {
 
-    private List<String> mData;
+    private List<RecordFile> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public RecordingRecyclerViewAdapter(Context context, List<String> data) {
+    public RecordingRecyclerViewAdapter(Context context, List<RecordFile> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
     }
@@ -30,8 +30,10 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String recordinName = mData.get(position);
-        holder.recordingName.setText(recordinName);
+        RecordFile recordFile = mData.get(position);
+        holder.recordingName.setText(recordFile.getRecordName());
+        holder.recordingDuration.setText(recordFile.getDuration());
+        holder.recordingDateTime.setText(recordFile.getDateAndTime());
     }
 
     // total number of rows
@@ -50,7 +52,7 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
         public ViewHolder(View itemView) {
             super(itemView);
             recordingName = itemView.findViewById(R.id.recording_name);
-            recordingDuration = itemView.findViewById(R.id.recording_date_time);
+            recordingDuration = itemView.findViewById(R.id.recording_duration);
             recordingDateTime = itemView.findViewById(R.id.recording_date_time);
 
             itemView.setOnClickListener(this);
@@ -68,7 +70,7 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
 
 
     // convenience method for getting data at click position
-    public String getItem(int id) {
+    public RecordFile getItem(int id) {
         return mData.get(id);
     }
 

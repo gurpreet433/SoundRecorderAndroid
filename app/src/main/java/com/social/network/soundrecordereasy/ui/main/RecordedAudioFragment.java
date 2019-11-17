@@ -1,9 +1,12 @@
 package com.social.network.soundrecordereasy.ui.main;
 
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -18,9 +21,11 @@ import android.widget.Toast;
 
 import com.social.network.soundrecordereasy.MainActivity;
 import com.social.network.soundrecordereasy.R;
+import com.social.network.soundrecordereasy.RecordFile;
 import com.social.network.soundrecordereasy.RecordingRecyclerViewAdapter;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -56,7 +61,7 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_recordings, container, false);
 
-        ArrayList<String> filesNameList= loadFiles();
+        ArrayList<RecordFile> filesNameList= loadFiles();
 
         // set up the RecyclerView
         RecyclerView recyclerView = root.findViewById(R.id.rvRecordings);
@@ -73,8 +78,8 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
         Toast.makeText(getContext(), "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
     }
 
-    private ArrayList<String> loadFiles() {
-        ArrayList<String> filesNameList= new ArrayList();
+    private ArrayList<RecordFile> loadFiles() {
+        ArrayList<RecordFile> filesNameList= new ArrayList();
 
         String path = getContext().getFilesDir().getAbsolutePath();
         Log.d("Files", "Path: " + path);
@@ -85,8 +90,21 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
         Log.d("Files", "Size: "+ files.length);
         for (int i = 0; i < files.length; i++)
         {
-            Log.d("Files", "FileName:" + files[i].getName());
-            filesNameList.add(files[i].getName());
+            // get duration
+            File file = new File(path + "/" + files[i].getName());
+            Uri uri = Uri.fromFile(file);
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(getContext(),uri);
+            String durationMillisec = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            String durationText = DateUtils.formatElapsedTime(Integer.parseInt(durationMillisec) / 1000);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy, h:mm a");
+            String name = files[i].getName();
+            String duration = durationText;
+            String dateAndTime = sdf.format(file.lastModified());
+
+
+            filesNameList.add( new RecordFile(name, duration, dateAndTime));
         }
         return  filesNameList;
     }

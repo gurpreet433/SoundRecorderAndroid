@@ -7,6 +7,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class RecordingUtility {
 
@@ -22,8 +23,8 @@ public class RecordingUtility {
     public void startRecording()
     {
         fileName = context.getFilesDir().getAbsolutePath();
-        String randomName = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(new Date());
-        fileName += "/" + randomName + ".3gp";
+        UUID uuid = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
+        fileName += "/" + "Recording_" + uuid.randomUUID().toString().substring(0, 8) + ".3gp";
 
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
