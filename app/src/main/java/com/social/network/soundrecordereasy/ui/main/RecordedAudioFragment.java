@@ -1,25 +1,22 @@
 package com.social.network.soundrecordereasy.ui.main;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.TextView;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.arch.lifecycle.ViewModelProviders;
 import android.widget.Toast;
 
-import com.social.network.soundrecordereasy.MainActivity;
 import com.social.network.soundrecordereasy.R;
 import com.social.network.soundrecordereasy.RecordFile;
 import com.social.network.soundrecordereasy.RecordingRecyclerViewAdapter;
@@ -34,9 +31,13 @@ import java.util.ArrayList;
 public class RecordedAudioFragment extends Fragment implements RecordingRecyclerViewAdapter.ItemClickListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private Context mContext;
+    private RecyclerView recyclerView;
 
     private PageViewModel pageViewModel;
     private RecordingRecyclerViewAdapter adapter;
+    ArrayList<RecordFile> filesNameListDataSet;
+
 
     public static RecordedAudioFragment newInstance(int index) {
         RecordedAudioFragment fragment = new RecordedAudioFragment();
@@ -55,18 +56,22 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
             index = getArguments().getInt(ARG_SECTION_NUMBER);
         }
         pageViewModel.setIndex(index);
+        filesNameListDataSet = new ArrayList<RecordFile>();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_recordings, container, false);
 
-        ArrayList<RecordFile> filesNameList= loadFiles();
+        filesNameListDataSet = loadFiles();
 
         // set up the RecyclerView
-        RecyclerView recyclerView = root.findViewById(R.id.rvRecordings);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new RecordingRecyclerViewAdapter(getContext(), filesNameList);
+        recyclerView = root.findViewById(R.id.rvRecordings);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new RecordingRecyclerViewAdapter(getContext(), filesNameListDataSet);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
@@ -79,7 +84,7 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
     }
 
     private ArrayList<RecordFile> loadFiles() {
-        ArrayList<RecordFile> filesNameList= new ArrayList();
+        filesNameListDataSet.clear();
 
         String path = getContext().getFilesDir().getAbsolutePath();
         Log.d("Files", "Path: " + path);
@@ -104,8 +109,59 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
             String dateAndTime = sdf.format(file.lastModified());
 
 
-            filesNameList.add( new RecordFile(name, duration, dateAndTime));
+            filesNameListDataSet.add( new RecordFile(name, duration, dateAndTime));
         }
-        return  filesNameList;
+        return  filesNameListDataSet;
+    }
+
+
+    @Override
+    public void onAttach(Context activity) {
+        super.onAttach(activity);
+        mContext = activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
+    }
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        SharedPreferences pref = null;
+        if(mContext != null) {
+           pref = mContext.getApplicationContext()
+                    .getSharedPreferences("MyPref", 0);
+        }
+
+        if (pref != null) {
+            SharedPreferences.Editor editor = pref.edit();
+            Log.i("he rere", "herere");
+
+            Boolean isDataChanged = pref.getBoolean("recorded", false);
+
+            if (isVisibleToUser && isDataChanged == true) {
+                loadFiles();
+                adapter.notifyDataSetChanged();
+
+                Log.i("herere", "herere1");
+
+                editor.putBoolean("recorded", false);
+                editor.commit();
+
+                if(recyclerView != null)
+                {
+                    int index;
+                    if(filesNameListDataSet != null) {
+                        index = filesNameListDataSet.size() - 1;
+                        recyclerView.scrollToPosition(index);
+                    }
+                }
+            }
+        }
     }
 }

@@ -22,8 +22,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if(position == 1)
-            return RecordedAudioFragment.newInstance(position + 1);
+        if(position == 1) {
+
+            RecordedAudioFragment recordedAudioFragment =  RecordedAudioFragment.newInstance(position + 1);
+            return recordedAudioFragment;
+        }
 
         return RecordingFragment.newInstance("first string", "second string");
     }

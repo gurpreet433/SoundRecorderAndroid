@@ -2,6 +2,7 @@ package com.social.network.soundrecordereasy.ui.main;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -127,8 +128,7 @@ public class RecordingFragment extends Fragment   {
     }
 
     private void togglePng() {
-        if (isRecording)
-        {
+        if (isRecording) {
             recordButton.setImageResource(R.drawable.stop);
             timerWidget.setBase(SystemClock.elapsedRealtime());
             timerWidget.start();
@@ -136,8 +136,7 @@ public class RecordingFragment extends Fragment   {
             statusText.setText("Recording..");
             isRecording = false;
             Log.i("here", "here");
-        }
-        else {
+        } else {
             recordButton.setImageResource(R.drawable.mic_img);
             timerWidget.stop();
             timerWidget.setBase(SystemClock.elapsedRealtime());
@@ -147,15 +146,19 @@ public class RecordingFragment extends Fragment   {
             Log.i("here", recorder.toString());
             statusText.setText("Tap the button to start recording");
             recordingfile = recorder.StopRecording();
-            Toast.makeText(getContext(), "File Saved: "+ recordingfile + "\n", Toast.LENGTH_SHORT).show();
-            notifyRecyclerView();
+            Toast.makeText(getContext(), "File Saved: " + recordingfile + "\n", Toast.LENGTH_SHORT).show();
+            saveInSharePref();
             isRecording = true;
         }
     }
 
-    public void notifyRecyclerView()
-    {
-        
+    private void saveInSharePref() {
+        SharedPreferences pref = getActivity().getApplicationContext()
+                .getSharedPreferences("MyPref", 0);
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putBoolean("recorded", true);
+        editor.commit();
     }
 
     public void onButtonPressed(Uri uri) {
