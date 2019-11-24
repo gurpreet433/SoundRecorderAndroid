@@ -217,10 +217,14 @@ public class RecordingUtility {
 
     public void stop()
     {
+
         isPlaying = false;
-        button.setImageResource(R.drawable.play);
-        mp.pause();
-        lengthPlayed = mp.getCurrentPosition();
+        if (button != null)
+            button.setImageResource(R.drawable.play);
+        if (mp != null){
+            mp.pause();
+            lengthPlayed = mp.getCurrentPosition();
+        }
     }
 
 }
