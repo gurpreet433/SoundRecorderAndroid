@@ -44,7 +44,7 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
 
 
     // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         TextView recordingName;
         TextView recordingDuration;
         TextView recordingDateTime;
@@ -64,6 +64,13 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
 
                 mClickListener.onItemClick(view, getAdapterPosition());
             }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+
+            // Todo : long click
+            return false;
         }
     }
 

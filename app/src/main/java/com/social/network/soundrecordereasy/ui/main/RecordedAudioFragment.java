@@ -1,6 +1,8 @@
 package com.social.network.soundrecordereasy.ui.main;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -15,11 +17,15 @@ import android.view.ViewGroup;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.arch.lifecycle.ViewModelProviders;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.social.network.soundrecordereasy.R;
 import com.social.network.soundrecordereasy.RecordFile;
 import com.social.network.soundrecordereasy.RecordingRecyclerViewAdapter;
+import com.social.network.soundrecordereasy.RecordingUtility;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -37,6 +43,7 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
     private PageViewModel pageViewModel;
     private RecordingRecyclerViewAdapter adapter;
     ArrayList<RecordFile> filesNameListDataSet;
+    RecordingUtility utility;
 
 
     public static RecordedAudioFragment newInstance(int index) {
@@ -50,6 +57,7 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        utility =new RecordingUtility(getContext());
         pageViewModel = ViewModelProviders.of(this).get(PageViewModel.class);
         int index = 1;
         if (getArguments() != null) {
@@ -80,7 +88,47 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(getContext(), "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(getContext(), "You clicked " +adapter.getItem(position) + " on row number "
+        //  position, Toast.LENGTH_SHORT).show();
+
+        createDialog(adapter.getItem(position));
+
+    }
+
+
+
+    private void createDialog(final RecordFile file) {
+
+        final Dialog dialog = new Dialog(mContext);
+        dialog.setContentView(R.layout.play_recording);
+        utility = new RecordingUtility(getContext());
+
+        TextView fileName = dialog.findViewById(R.id.recording_name_player);
+        fileName.setText(file.getRecordName());
+
+        final TextView timePlayed = dialog.findViewById(R.id.time_played);
+        TextView totalTime = dialog.findViewById(R.id.total_time);
+        totalTime.setText(file.getDuration());
+
+        final ImageButton playButton =  dialog.findViewById(R.id.play_button);
+        final SeekBar seekbar = dialog.findViewById(R.id.seek_bar);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext, "Clicked", Toast.LENGTH_SHORT).show();
+                utility.play(file, playButton, seekbar, timePlayed);
+            }
+        });
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(final DialogInterface arg0) {
+                utility.stop();
+            }
+        });
+
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 
     private ArrayList<RecordFile> loadFiles() {
@@ -107,13 +155,20 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
             String name = files[i].getName();
             String duration = durationText;
             String dateAndTime = sdf.format(file.lastModified());
+            mmr.release();
 
 
-            filesNameListDataSet.add( new RecordFile(name, duration, dateAndTime));
+            filesNameListDataSet.add( new RecordFile(name, duration, dateAndTime, Integer.parseInt(durationMillisec)));
         }
         return  filesNameListDataSet;
     }
 
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        utility.stop();
+    }
 
     @Override
     public void onAttach(Context activity) {

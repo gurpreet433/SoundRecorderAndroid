@@ -4,11 +4,13 @@ public class RecordFile {
     String recordName;
     String duration;
     String dateAndTime;
+    int durationInMilisec;
 
-    public RecordFile(String recordName, String duration, String dateAndTime) {
+    public RecordFile(String recordName, String duration, String dateAndTime, int durationInMilisec) {
         this.recordName = recordName;
         this.duration = duration;
         this.dateAndTime = dateAndTime;
+        this.durationInMilisec = durationInMilisec;
     }
 
     public String getRecordName() {
@@ -33,6 +35,11 @@ public class RecordFile {
 
     public void setDateAndTime(String dateAndTime) {
         this.dateAndTime = dateAndTime;
+    }
+
+    int getDurationInMilisec()
+    {
+        return durationInMilisec;
     }
 }
 
