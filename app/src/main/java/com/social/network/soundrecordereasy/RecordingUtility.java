@@ -27,7 +27,6 @@ public class RecordingUtility {
     private String fileName = null;
     private Context context;
     Boolean isPlaying;
-    Boolean isFileLoaded;
     MediaPlayer mp;
     SeekBar seekBar;
     int lengthPlayed;
@@ -40,7 +39,6 @@ public class RecordingUtility {
     {
         this.context = context;
         isPlaying = false;
-        isFileLoaded = false;
         mp = new MediaPlayer();
         lengthPlayed = 0;
         isProgressChanged = false;
@@ -51,13 +49,15 @@ public class RecordingUtility {
 
         fileName = context.getFilesDir().getAbsolutePath();
         UUID uuid = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
-        fileName += "/" + "Recording_" + uuid.randomUUID().toString().substring(0, 8) + ".3gp";
+        fileName += "/" + "Recording_" + uuid.randomUUID().toString().substring(0, 8) + ".aac";
 
+        if (recorder != null)
+            recorder.release();
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
         recorder.setOutputFile(fileName);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
         try {
             recorder.prepare();
@@ -77,7 +77,37 @@ public class RecordingUtility {
         return fileName;
     }
 
+    public void setSeekBar(RecordFile file)
+    {
+        Log.i("seekbar", "max duration "+ file.getDurationInMilisec());
+        seekBar.setMax(file.getDurationInMilisec());
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
+
+            @Override
+            public void onProgressChanged(final SeekBar seekBar, int progress, boolean fromUser) {
+
+                if (mp != null && fromUser)
+                {
+                    Log.i("seekbar", "progress onprogresschanged "+ progress);
+                    mp.seekTo(progress);
+                    isProgressChanged = true;
+                    storedProgress = progress;
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+    }
 
     public void play(final RecordFile file, final ImageButton btn, final SeekBar seekBar, final TextView timeLabel)
     {
@@ -89,57 +119,20 @@ public class RecordingUtility {
             final String path = context.getFilesDir().getAbsolutePath();
             isPlaying = true;
             try {
-                if(!isFileLoaded) {
-                    mp.setDataSource(path + File.separator + file.recordName);
-                    mp.prepare();
-                    isFileLoaded = true;
-                    mp.start();
 
-
-                    Log.i("seekbar", "max duration "+ file.getDurationInMilisec());
-                    seekBar.setMax(file.getDurationInMilisec());
-                    seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-
-                        @Override
-                        public void onProgressChanged(final SeekBar seekBar, int progress, boolean fromUser) {
-
-                            if (mp != null && fromUser)
-                            {
-
-                                Log.i("seekbar", "progress onprogresschanged "+ progress);
-                                mp.seekTo(progress);
-                                isProgressChanged = true;
-                                storedProgress = progress;
-                            }
-
-                        }
-
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-
-                        }
-
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                        }
-                    });
-
-
+                mp.reset();
+                mp.setDataSource(path + File.separator + file.recordName);
+                mp.prepare();
+                mp.start();
+                if(isProgressChanged == true) {
+                    isProgressChanged = false;
+                    mp.seekTo(storedProgress);
                 }
                 else
-                {
-                    mp.reset();
-                    mp.setDataSource(path + File.separator + file.recordName);
-                    mp.prepare();
-                    mp.start();
-                    if(isProgressChanged == true) {
-                        isProgressChanged = false;
-                        mp.seekTo(storedProgress);
-                    }
-                    else
-                        mp.seekTo(lengthPlayed);
-                }
+                    mp.seekTo(lengthPlayed);
+
+
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -148,8 +141,9 @@ public class RecordingUtility {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (mp != null && mp.getCurrentPosition() <= seekBar.getMax()){
-
+                    while (mp != null && (mp.getCurrentPosition() <= seekBar.getMax())){
+                        Log.i("what", "mp.getCurrentPosition()" + mp.getCurrentPosition()+"");
+                        Log.i("whatt", "seekBar.getMax()" + seekBar.getMax() +"");
                         try {
                             Message m = new Message();
                             m.what = mp.getCurrentPosition();
@@ -163,12 +157,16 @@ public class RecordingUtility {
                         if(mp != null && (mp.getCurrentPosition() == seekBar.getMax()))
                         {
                             isPlaying = false;
+                            Message m = new Message();
+                            m.what = seekBar.getMax();
+                            handler.sendMessage(m);
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
                                     btn.setImageResource(R.drawable.play);
                                 }
                             });
+                            break;
                         }
                     }
                 }

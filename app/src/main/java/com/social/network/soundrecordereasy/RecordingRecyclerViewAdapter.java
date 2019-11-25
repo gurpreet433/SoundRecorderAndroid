@@ -1,9 +1,11 @@
 package com.social.network.soundrecordereasy;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -56,24 +58,28 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
             recordingDateTime = itemView.findViewById(R.id.recording_date_time);
 
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
+            itemView.setLongClickable(true);
+            itemView.setClickable(true);
         }
 
         @Override
         public void onClick(View view) {
             if (mClickListener != null){
-
                 mClickListener.onItemClick(view, getAdapterPosition());
             }
         }
 
+
         @Override
         public boolean onLongClick(View view) {
 
-            // Todo : long click
-            return false;
+            if (mClickListener != null){
+                mClickListener.onItemLongClick(view, getAdapterPosition());
+            }
+           return true;
         }
     }
-
 
 
     // convenience method for getting data at click position
@@ -89,6 +95,7 @@ public class RecordingRecyclerViewAdapter extends RecyclerView.Adapter<Recording
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+        void onItemLongClick(View view, int position);
     }
 }
 

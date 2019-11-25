@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SoundRecorderEasy</string>
+    <string name="app_name">Sound Recorder</string>
     <string name="tab_1_name">record</string>
     <string name="tab_2_name">saved recordings</string>
 
