@@ -181,7 +181,7 @@ public class RecordedAudioFragment extends Fragment implements RecordingRecycler
 
                 text.setText(file.getRecordName().replaceAll(".aac$",""));
 
-                builder.setTitle("Rename file").setMessage("Name this new profile").setView(text);
+                builder.setTitle("Rename file").setView(text);
                 builder.setPositiveButton("rename", new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface di, int i) {

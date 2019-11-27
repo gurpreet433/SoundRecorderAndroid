@@ -68,12 +68,15 @@ public class RecordingFragment extends Fragment   {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+            requestPermissions( permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
         }
         else
         {
+            permissionToRecordAccepted = true;
             recorder = new RecordingUtility(getContext());
         }
 
@@ -87,7 +90,6 @@ public class RecordingFragment extends Fragment   {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case REQUEST_RECORD_AUDIO_PERMISSION:
                 permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
@@ -99,6 +101,7 @@ public class RecordingFragment extends Fragment   {
             Toast.makeText(getContext(), "Cannot record audio without permission!", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
+        Log.i("here", "here");
     }
 
 
@@ -122,7 +125,12 @@ public class RecordingFragment extends Fragment   {
             public void onClick(View view) {
                 if (isRecording == null)
                     isRecording = true;
-                togglePng();
+
+                if(permissionToRecordAccepted)
+                    togglePng();
+                else
+                    Toast.makeText(getContext(),"Please provide permission to app from setting menu",
+                            Toast.LENGTH_SHORT).show();
             }
         });
     }
