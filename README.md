@@ -1,5 +1,3 @@
-# SoundRecorderAndroid
-
 # SoundRecorderAndroid - Android App
 <img src="/ReadmeFiles/SoundRecorderAndroid_logo.png" align="left"
 width="200" hspace="10" vspace="10">
