@@ -1,7 +1,7 @@
 # SoundRecorderAndroid
 
 # SoundRecorderAndroid - Android App
-<img src="/readmeFiles/SoundRecorderAndroid_logo.png" align="left"
+<img src="/ReadmeFiles/SoundRecorderAndroid_logo.png" align="left"
 width="200" hspace="10" vspace="10">
 
 # Features:
@@ -17,9 +17,9 @@ SoundRecorderAndroid is currently not available on the Google Play Store.
 
 # Screenshots:
 <div id="screenshot">
-  <img src="/readmeFiles/screenshot1.png" width="250">
-  <img src="/readmeFiles/screenshot2.png" width="250">
-  <img src="/readmeFiles/screenshot3.png" width="250">
+  <img src="/ReadmeFiles/screenshot1.png" width="250">
+  <img src="/ReadmeFiles/screenshot2.png" width="250">
+  <img src="/ReadmeFiles/screenshot3.png" width="250">
 </div>
 
 ## Contributing
